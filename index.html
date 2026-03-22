@@ -65,6 +65,11 @@
       font-weight: bold;
       color: #2e7d32;
     }
+	
+	.availablility {
+      font-size: 22px;
+      font-weight: bold;
+    }
 
     .offer {
       margin-top: 8px;
@@ -166,7 +171,7 @@
 
 <!-- LOCATION -->
 <div class="card">
-  <h3>📍 Live Location</h3>
+  <h3>📍 Live Location <span class="availablility" id="availability" ></span></h3> 
   <div id="map"></div>
 </div>
 
@@ -187,7 +192,7 @@
 
 <!-- PAYMENT -->
 <div class="card">
-  <h3>🛒 Pay and Collect</h3>
+  <h3>🛒 Order & Pay</h3>
 
   <input type="number" id="qty" placeholder="Enter quantity" onkeyup="calculate()" onchange="calculate()">
 
@@ -244,10 +249,10 @@
       currentLng = d.lng;
 	  var marker = L.marker([currentLat, currentLng]).addTo(map);
 	  map.setView([currentLat, currentLng], 15);
-      //let loc = [d.lat, d.lng];
-      //marker.setLatLng(loc);
-      //map.setView(loc);
-    }
+	  statusSetter("availability", d.status)
+    }else{
+		statusSetter("availability", "offline")
+	}
   });
   
    firebase.database().ref("price").once("value")
@@ -274,6 +279,15 @@
     window.open(url, '_blank');
   }
 
+	function statusSetter(id, status){
+	  if(status == 'online'){
+		document.getElementById(id).innerText = "✅️ Available"
+		document.getElementById(id).style = "color:green"
+	  }else{
+		document.getElementById(id).innerText = "❌ Not Available"
+		document.getElementById(id).style = "color:red"
+	  }
+	}
 
   function calculate() {
     let qty = document.getElementById("qty").value;
@@ -305,12 +319,10 @@
 	let visitorRef = firebase.database().ref("visitors/count");
 
 	visitorRef.transaction(current => {
-	debugger
 	  return (current || 0) + 1;
 	});
 	
 	visitorRef.on("value", snap => {
-	debugger
 	  let count = snap.val() || 0;
 	  document.getElementById("visitorCount").innerText = count;
 	});
