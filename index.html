@@ -239,7 +239,7 @@
 
   firebase.database().ref("hawker").on("value", snap => {
     let d = snap.val();
-    if (d) {
+    if (d && d.status == 'online') {
       currentLat = d.lat;
       currentLng = d.lng;
 	  var marker = L.marker([currentLat, currentLng]).addTo(map);
