@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-  <style>
+   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -22,16 +22,27 @@
       padding: 20px;
       border-bottom-left-radius: 20px;
       border-bottom-right-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .header h1 {
+    .header-left h1 {
       margin: 0;
       font-size: 22px;
     }
 
-    .header p {
+    .header-left p {
       margin: 5px 0 0;
       opacity: 0.9;
+    }
+
+    .vendor-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 2px solid white;
+      object-fit: cover;
     }
 
     /* CARD */
@@ -43,40 +54,27 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    /* MAP */
     #map {
       height: 220px;
       border-radius: 12px;
     }
 
-    /* BUTTON */
-    .btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #ff5722;
-      color: white;
-    }
-
-    .secondary {
-      background: #e0e0e0;
-    }
-
-    /* PRICE */
     .price {
       font-size: 22px;
       font-weight: bold;
       color: #2e7d32;
     }
 
-    /* INPUT */
+    .offer {
+      margin-top: 8px;
+      padding: 8px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
     input {
       width: 100%;
       padding: 12px;
@@ -86,7 +84,6 @@
       font-size: 16px;
     }
 
-    /* TOTAL */
     .total-box {
       background: #fff3e0;
       padding: 12px;
@@ -97,9 +94,8 @@
       text-align: center;
     }
 
-    /* FLOATING NAV BUTTON */
     .floating-btn {
-	  z-index: 999;
+      z-index: 999;
       position: fixed;
       bottom: 90px;
       right: 20px;
@@ -113,7 +109,6 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    /* BOTTOM BAR */
     .bottom-bar {
       width: 100%;
       background: white;
@@ -140,16 +135,32 @@
       background: #ff9800;
       color: white;
     }
+	
+	@keyframes blink {
+	  0% { opacity: 1; }
+	  50% { opacity: 0.3; }
+	  100% { opacity: 1; }
+	}
 
+	.blink {
+	  animation: blink 1s infinite;
+	}
   </style>
 </head>
 
 <body>
 
 <!-- HEADER -->
-<div class="header">
-  <h1>🥣 Dahi Bade Vala</h1>
-  <p>Fresh & Tasty Street Food 😋</p>
+<div class="header" style="display:flex; align-items:center; gap:15px;">
+
+  <div>
+    <h1 style="margin:0;">🥣 Dahi Bade Vala</h1>
+    <p style="margin:5px 0 0;">Fresh & Tasty Street Food 😋</p>
+  </div>
+  
+  <!-- 🖼️ Vendor Image -->
+  <img src=".\image.png" class="vendor-img">
+
 </div>
 
 <!-- LOCATION -->
@@ -158,18 +169,26 @@
   <div id="map"></div>
 </div>
 
-<!-- PRICE -->
+<!-- PRICE -->📢
 <div class="card">
   <h3>💰 Price</h3>
-  <p>Dahi Bade Plate</p>
-  <div class="price" id="currentPrice">₹0</div>
+	<p>Plate</p>
+	<input type="hidden" id="currentPrice">
+  <div class="price" id="priceof2">₹0</div><span class="price">2 Piece</span>
+  
+    <!-- 🏷️ OFFER -->
+  <div class="offer blink" id="offerBox">
+    <div>🎉 Buy 1 piece in 20₹</div>
+    <div>🎉 Buy 6 piece in 100₹</div>
+  </div>
+  
 </div>
 
 <!-- PAYMENT -->
 <div class="card">
   <h3>🛒 Order & Pay</h3>
 
-  <input type="number" id="qty" placeholder="Enter quantity" onkeyup="calculate()">
+  <input type="number" id="qty" placeholder="Enter quantity" onkeyup="calculate()" onchange="calculate()">
 
   <div class="total-box">
     Total: ₹ <span id="total">0</span>
@@ -232,7 +251,8 @@
   .then(snap => {
     let d = snap.val();
     if (d) {
-	  document.getElementById("currentPrice").innerText = d.dahiBade;
+	  document.getElementById("currentPrice").value = d.dahiBade;
+	  document.getElementById("priceof2").innerText = d.dahiBade*2;
 	  perAmt = d.dahiBade;
     }
   });
@@ -240,7 +260,8 @@
     firebase.database().ref("price").on("value", snap => {
     let data = snap.val();
     if (data && data.dahiBade) {
-      document.getElementById("currentPrice").innerText = data.dahiBade;
+	  document.getElementById("currentPrice").value = d.dahiBade;
+      document.getElementById("priceof2").innerText = data.dahiBade*2;
 	  calculate();
     }
   });
@@ -253,9 +274,14 @@
 
   function calculate() {
     let qty = document.getElementById("qty").value;
-	let perAmt = document.getElementById("currentPrice").innerText
+	let perAmt = document.getElementById("currentPrice").value
+	if(qty == 1){
+		perAmt = 20;
+	}else if(qty%6 == 0){
+		perAmt = 16.66;
+	}
     let total = qty * perAmt;
-    document.getElementById("total").innerText = total;
+    document.getElementById("total").innerText = Math.round(total);
   }
 
   function pay() {
