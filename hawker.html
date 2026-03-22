@@ -186,6 +186,8 @@
     clearInterval(interval);
 	status = 'off'
     firebase.database().ref("hawker").update({
+	  lat: 0,
+      lng: 0,
       status: "offline",
 	  secret: "mysecret123"
     });
