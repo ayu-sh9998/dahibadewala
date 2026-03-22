@@ -180,6 +180,7 @@
   <h3>💰 Price</h3>
 	<p>Plate</p>
 	<input type="hidden" id="currentPrice">
+	<input type="hidden" id="status">
   <div class="price">₹<span class="price" id="priceof2">0</span>/- Per Plate (2 Piece)</div>
   
     <!-- 🏷️ OFFER -->
@@ -192,7 +193,7 @@
 
 <!-- PAYMENT -->
 <div class="card">
-  <h3>🛒 Order & Pay</h3>
+  <h3>🛒 Order & Self Collect</h3>
 
   <input type="number" id="qty" placeholder="Enter quantity" onkeyup="calculate()" onchange="calculate()">
 
@@ -249,9 +250,11 @@
       currentLng = d.lng;
 	  var marker = L.marker([currentLat, currentLng]).addTo(map);
 	  map.setView([currentLat, currentLng], 15);
-	  statusSetter("availability", d.status)
+	  statusSetter("availability", d.status);
+	  document.getElementById("status").value = d.status;
     }else{
 		statusSetter("availability", "offline")
+		document.getElementById("status").value = "offline";
 	}
   });
   
@@ -308,6 +311,11 @@
       alert("Please calculate first");
       return;
     }
+	
+	if(document.getElementById("status").value != 'online'){
+		alert("Vendor Not Available!");
+      return;
+	}
 
     let upiID = "mromprakash123321@okicici";
 
