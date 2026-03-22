@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vendor Panel - Dahi Bade Vala</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f3f6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2e7d32, #66bb6a);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    .card {
+      background: white;
+      margin: 15px;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .status {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .online {
+      color: green;
+    }
+
+    .offline {
+      color: red;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .start-btn {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .stop-btn {
+      background: #c62828;
+      color: white;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    .time {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+	
+	.current-price {
+      font-size: 25px;
+	  font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="header">
+  <h2>🥣 Dahi Bade Vala</h2>
+  <p>Vendor Panel</p>
+</div>
+
+<!-- LOCATION CONTROL -->
+<div class="card">
+  <h3>📍 Location Control</h3>
+
+  <button class="start-btn" onclick="startSharing()">Start Sharing</button>
+  <button class="stop-btn" onclick="stopSharing()">Stop Sharing</button>
+
+  <div class="status" id="status">Status: Offline</div>
+  <div class="time" id="lastUpdated">Last Updated: -</div>
+</div>
+
+<!-- PRICE CONTROL -->
+<div class="card">
+  <h3>💰 Set Price</h3>
+
+  <label>Dahi Bade Price (₹)</label>
+  <input type="number" id="priceInput" placeholder="Enter price">
+
+  <button onclick="savePrice()">Save Price</button>
+
+  <div class="current-price">Current Price: ₹<div id="currentPrice">30</div></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyC1C-mVtvJoIn29TWVkH9Y9ivpL0rWmd7I",
+  authDomain: "acite-aa2e3.firebaseapp.com",
+  databaseURL: "https://acite-aa2e3.firebaseio.com",
+  projectId: "acite-aa2e3",
+  storageBucket: "acite-aa2e3.appspot.com",
+  messagingSenderId: "916499994527",
+  appId: "1:916499994527:web:36168ec763bce6a06a8faa",
+  measurementId: "G-PHYCBC6K93"
+};
+
+  firebase.initializeApp(firebaseConfig);
+
+  let interval = null;
+  
+  firebase.database().ref("hawker").once("value")
+  .then(snap => {
+    let d = snap.val();
+    if (d) {
+      updateUI(d);
+    }
+  });
+  firebase.database().ref("price").once("value")
+  .then(snap => {
+    let d = snap.val();
+    if (d) {
+	  document.getElementById("currentPrice").innerText = d.dahiBade;
+    }
+  });
+
+  // 🟢 Start Sharing
+  var status = 'off';
+  function startSharing() {
+    document.getElementById("status").innerHTML = "Status: <span class='online'>Online</span>";
+	if(status == 'on')
+		return;
+	status = 'on'
+	shareLocation();
+    interval = setInterval(() => {
+       shareLocation()
+    }, (1000*30));
+  }
+  
+  function shareLocation(){
+	navigator.geolocation.getCurrentPosition(pos => {
+        let lat = pos.coords.latitude;
+        let lng = pos.coords.longitude;
+
+        let time = new Date().toLocaleString();
+
+        firebase.database().ref("hawker").set({
+          lat: lat,
+          lng: lng,
+          lastUpdated: time,
+          status: "online",
+		  secret: "mysecret123"
+        });
+
+        document.getElementById("lastUpdated").innerText = "Last Updated: " + time;
+      });
+  }
+
+  // 🔴 Stop Sharing
+  function stopSharing() {
+    clearInterval(interval);
+	status = 'off'
+    firebase.database().ref("hawker").update({
+      status: "offline",
+	  secret: "mysecret123"
+    });
+
+    document.getElementById("status").innerHTML = "Status: <span class='offline'>Offline</span>";
+  }
+
+  // 💰 Save Price
+  function savePrice() {
+    let price = document.getElementById("priceInput").value;
+
+    if (!price) {
+      alert("Enter price first");
+      return;
+    }
+
+    firebase.database().ref("price").set({
+      dahiBade: price,
+	  secret: "mysecret123"
+    });
+
+    document.getElementById("currentPrice").innerText = price;
+  }
+
+  // 🔄 Load Current Price
+  firebase.database().ref("price").on("value", snap => {
+    let data = snap.val();
+    if (data && data.dahiBade) {
+      document.getElementById("currentPrice").innerText = data.dahiBade;
+    }
+  });
+  
+  function updateUI(d){
+	document.getElementById("currentPrice").innerText = d.currentPrice
+	if(d.status == 'online'){
+		document.getElementById("status").innerHTML = "Status: <span class='online'>Online</span>";
+	}else{
+		document.getElementById("status").innerHTML = "Status: <span class='offline'>Offline</span>";
+	}
+	document.getElementById("lastUpdated").innerText = "Last Updated: " + d.lastUpdated;
+  }
+
+</script>
+
+</body>
+</html>
