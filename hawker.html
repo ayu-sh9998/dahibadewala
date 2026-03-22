@@ -152,7 +152,6 @@
   // 🟢 Start Sharing
   var status = 'off';
   function startSharing() {
-    document.getElementById("status").innerHTML = "Status: <span class='online'>Online</span>";
 	if(status == 'on')
 		return;
 	status = 'on'
@@ -160,6 +159,7 @@
     interval = setInterval(() => {
        shareLocation()
     }, (1000*60));
+	document.getElementById("status").innerHTML = "Status: <span class='online'>Online</span>";
   }
   
   function shareLocation(){
@@ -229,8 +229,10 @@
 	document.getElementById("currentPrice").innerText = d.currentPrice
 	if(d.status == 'online'){
 		document.getElementById("status").innerHTML = "Status: <span class='online'>Online</span>";
+		startSharing();
 	}else{
 		document.getElementById("status").innerHTML = "Status: <span class='offline'>Offline</span>";
+		stopSharing();
 	}
 	document.getElementById("lastUpdated").innerText = "Last Updated: " + d.lastUpdated;
   }
