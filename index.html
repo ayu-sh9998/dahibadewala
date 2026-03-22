@@ -208,11 +208,11 @@
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
   <button class="calc-btn" onclick="calculate()">Calculate</button>
-  <button class="pay-btn" onclick="pay()">Pay Now</button>
+  <!-- <button class="pay-btn" onclick="pay()">Pay Now</button>-->
 </div>
 
    <p style="font-size:14px;color:#666;text-align: center;">
-   	<span id="visitorCount">0</span> people visited. version: 1.2
+   	<span id="visitorCount">0</span> people visited. version: 1.0
    </p>
 <!-- Firebase -->
 
@@ -316,9 +316,8 @@
 		alert("Vendor Not Available!");
       return;
 	}
-    let upiID = "Q160289163@ybl";
+    let upiID = "@ybl";
     let url = `upi://pay?pa=${upiID}&pn=PhonePeMerchant&am=${1}&cu=INR`;
-	url = 'upi://';
     window.location.href = url;
   }
   
