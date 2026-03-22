@@ -212,7 +212,7 @@
 </div>
 
    <p style="font-size:14px;color:#666;text-align: center;">
-   	<span id="visitorCount">0</span> people visited
+   	<span id="visitorCount">0</span> people visited. version: 1.0
    </p>
 <!-- Firebase -->
 
@@ -316,8 +316,7 @@
 		alert("Vendor Not Available!");
       return;
 	}
-    let upiID = "Q937964185@ybl";
-
+    let upiID = "Q160289163@ybl";
     let url = `upi://pay?pa=${upiID}&pn=PhonePeMerchant&am=${total}&cu=INR`;
     window.location.href = url;
   }
